@@ -1,0 +1,145 @@
+# General settings
+# ================
+
+queue_directory = /var/spool/postfix
+command_directory = /usr/sbin
+daemon_directory = /usr/lib/postfix
+data_directory = /var/lib/postfix
+mail_owner = postfix
+unknown_local_recipient_reject_code = 550
+debug_peer_level = 2
+debugger_command =
+	 PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+	 ddd $daemon_directory/$process_name $process_id & sleep 5
+sendmail_path = /usr/sbin/sendmail
+newaliases_path = /usr/bin/newaliases
+mailq_path = /usr/bin/mailq
+setgid_group = postdrop
+html_directory = no
+manpage_directory = /usr/share/man
+sample_directory = /etc/postfix/sample
+readme_directory = no
+# we <3 ipv6
+# inet_protocols = ipv4
+
+
+# Domain specific config
+# ======================
+
+# Server settings
+# ---------------
+
+# Domain
+mydomain = {{domain}}
+myhostname = mail.$mydomain
+myorigin = $mydomain
+# Extra domains
+mydestination = /etc/postfix/domains
+# Bind to everything
+inet_interfaces = all
+# Only trust local networks
+mynetworks = 127.0.0.0/8
+
+# Delivery settings
+# -----------------
+
+# Final destination domains
+transport_maps = hash:/etc/postfix/transport
+virtual_transport = virtual
+
+# Return mailbox/maildir path
+virtual_mailbox_maps = ldap:/etc/postfix/ldap/virtual_maps.cf
+virtual_mailbox_base = /
+
+# Return maildrops
+virtual_alias_maps = regexp:/etc/postfix/listas.cf,
+                     hash:/var/lib/mailman/data/virtual-mailman,
+                     ldap:/etc/postfix/ldap/virtual_alias.cf
+
+# Mailman aliases
+alias_maps = hash:/var/lib/mailman/data/aliases
+alias_database = $alias_maps
+
+# HAS TO EXIST
+local_recipient_maps = proxy:unix:passwd.byname $virtual_mailbox_maps
+
+
+# Filesystem settings
+# -------------------
+
+# Enables Postfix to create maildirs/mailboxes
+# virtual_create_maildirsize = yes
+
+# Numbers correspond to the vmail/mail/whatever user/group that should
+# own the maildirs/mailboxes
+virtual_minimum_uid = mail
+virtual_uid_maps = static:mail
+virtual_gid_maps = static:mail
+
+# Quota Settings 
+# ---------------
+
+# Limits are in bytes
+virtual_mailbox_limit = 0
+mailbox_size_limit= 0
+message_size_limit = 0
+
+
+# Security settings
+# -----------------
+
+disable_dns_lookups = no
+strict_8bitmime = no
+disable_mime_output_conversion = no
+
+# Client restrictions
+smtpd_client_restrictions =
+  permit_mynetworks,
+  permit_sasl_authenticated,
+
+# Rejection policy
+smtpd_recipient_restrictions =
+	permit_mynetworks,
+	permit_sasl_authenticated,
+	reject_unauth_destination,
+	reject_non_fqdn_sender,
+	reject_unlisted_recipient,
+#	check_policy_service unix:private/policy
+
+# Use TLS
+smtpd_use_tls = yes
+# Always!
+smtpd_tls_auth_only = no
+smtpd_tls_key_file = /etc/ssl/private/{{domain}}.key
+smtpd_tls_cert_file = /etc/ssl/certs/{{domain}}.crt
+smtpd_tls_loglevel = 0
+smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
+tls_random_source = dev:/dev/urandom
+
+
+# SASL
+# ----
+
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+broken_sasl_auth_clients = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+broken_sasl_auth_clients = yes
+
+
+# Dovecot
+# -------
+dovecot_destination_recipient_limit=1
+
+
+# Mailman
+# -------
+
+relay_domains = $mydestination
+#mailman_destination_recipient_limit = 1
+
+# WITHOUT THIS MAILMAN DOES NOT WORK!!!
+append_at_myorigin = no
