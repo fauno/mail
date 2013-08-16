@@ -26,8 +26,7 @@ readme_directory = no
 # Domain specific config
 # ======================
 
-# Server settings
-# ---------------
+# ## Server settings
 
 # Domain
 mydomain = {{domain}}
@@ -40,8 +39,7 @@ inet_interfaces = all
 # Only trust local networks
 mynetworks = 127.0.0.0/8
 
-# Delivery settings
-# -----------------
+# ## Delivery settings
 
 # Final destination domains
 transport_maps = hash:/etc/postfix/transport
@@ -64,8 +62,7 @@ alias_database = $alias_maps
 local_recipient_maps = proxy:unix:passwd.byname $virtual_mailbox_maps
 
 
-# Filesystem settings
-# -------------------
+# ## Filesystem settings
 
 # Enables Postfix to create maildirs/mailboxes
 # virtual_create_maildirsize = yes
@@ -76,8 +73,7 @@ virtual_minimum_uid = mail
 virtual_uid_maps = static:mail
 virtual_gid_maps = static:mail
 
-# Quota Settings 
-# ---------------
+# ## Quota Settings 
 
 # Limits are in bytes
 virtual_mailbox_limit = 0
@@ -85,8 +81,7 @@ mailbox_size_limit= 0
 message_size_limit = 0
 
 
-# Security settings
-# -----------------
+# ## Security settings
 
 disable_dns_lookups = no
 strict_8bitmime = no
@@ -118,8 +113,7 @@ smtpd_tls_session_cache_timeout = 3600s
 tls_random_source = dev:/dev/urandom
 
 
-# SASL
-# ----
+# ## SASL
 
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_security_options = noanonymous
@@ -130,13 +124,11 @@ smtpd_sasl_auth_enable = yes
 broken_sasl_auth_clients = yes
 
 
-# Dovecot
-# -------
+# ## Dovecot
 dovecot_destination_recipient_limit=1
 
 
-# Mailman
-# -------
+# ## Mailman
 
 relay_domains = $mydestination
 #mailman_destination_recipient_limit = 1
