@@ -9,7 +9,7 @@ Stop thinking about one big mail service!
 
 ## Requirements
 
-postfix, ejabberd, dovecot, cyrus-sasl, openldap
+postfix, ejabberd, dovecot, cyrus-sasl, openldap, opendkim
 
 ## TODO
 
