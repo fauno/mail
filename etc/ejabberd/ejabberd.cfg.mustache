@@ -152,7 +152,7 @@
   %%
   %% ejabberd_stun: Handles STUN Binding requests
   %%
-  %%{{3478, udp}, ejabberd_stun, []},
+  %%{ {3478, udp}, ejabberd_stun, []},
 
   {5280, ejabberd_http, [
 			 %%{request_handlers,
@@ -196,8 +196,8 @@
 %%
 %% Allow or deny communication with specific servers.
 %%
-%%{{s2s_host, "goodhost.org"}, allow}.
-%%{{s2s_host, "badhost.org"}, deny}.
+%%{ {s2s_host, "goodhost.org"}, allow}.
+%%{ {s2s_host, "badhost.org"}, deny}.
 
 %%
 %% Outgoing S2S options
@@ -593,7 +593,8 @@
 %%
 %% Shared roster - have all local accounts added to your buddy list
 {host_config, "{{domain}}",
-[{{add, modules},
+[{
+  {add, modules},
   [
     {mod_shared_roster_ldap, [
         {ldap_base, "dc={{hostname}}.local"},

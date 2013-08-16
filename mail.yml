@@ -1,3 +1,4 @@
+---
 mail: '/srv/mail'
 hostname: 'naven'
 domain: 'naven.org'
@@ -12,3 +13,4 @@ postfix_password: ''
 admin_password: ''
 dovecot_password: ''
 sasl_password: ''
+---
