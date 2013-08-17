@@ -4,5 +4,9 @@ vendor/*
 *.conf
 *.cf*
 *.ext
+*.key
+*.crt
+*.dkim
+dns/*.txt
 domains
 transport
