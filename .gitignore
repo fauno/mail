@@ -2,7 +2,8 @@ Gemfile.lock
 vendor/*
 .bundle/*
 *.conf
-*.cf*
+*.cf
+*.cfg
 *.ext
 *.key
 *.crt

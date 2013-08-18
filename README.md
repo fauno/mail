@@ -21,4 +21,5 @@ postfix, ejabberd, dovecot, cyrus-sasl, openldap, opendkim
 * [Encrypted storage](https://grepular.com/Automatically_Encrypting_all_Incoming_Email "Automatically Encrypting all Incoming Email - grepular.com")
 * Prosody - smaller than ejabberd but as of v0.8 a pain for ldap
 * PAM authentication - provide shells to users
+* Postscreen - and other spam blocking techniques
 * Other ldap-capable services
