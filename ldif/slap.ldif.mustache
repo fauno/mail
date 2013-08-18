@@ -61,8 +61,7 @@ objectClass: groupOfURLs
 objectClass: top
 structuralObjectClass: groupOfURLs
 description: {{inhabitants}}
-memberURL: ldap:///ou={{inhabitants}},dc={{hostname}}.local?cn,uid,mail?sub?(&(objectClass=Cou
- rierMailAccount)(mail=*@{{domain}}))
+memberURL: ldap:///ou={{inhabitants}},dc={{hostname}}.local?cn,uid,mail?sub?(&(objectClass=CourierMailAccount)(mail=*@{{domain}}))
 
 # Admins
 dn: ou={{admins}},dc={{hostname}}.local
