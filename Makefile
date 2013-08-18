@@ -49,11 +49,12 @@ ssl-keys: ssl-dirs
 	certtool --generate-privkey \
 	         --outfile=etc/ssl/private/$(DOMAIN).key \
 	         --sec-param=$(SECURITY)
-# I only needed this on a ircd
-	test -f etc/ssl/private/$(DOMAIN).dh || \
-	certtool --generate-dh \
-	         --outfile=etc/ssl/private/$(DOMAIN).dh \
-					 --bits=2048
+	for dh in 512 1024 2048; do \
+	  test -f etc/ssl/private/$$dh.dh || \
+	  certtool --generate-dh \
+	           --outfile=etc/ssl/private/$$dh.dh \
+	           --bits=$$dh ; \
+	done
 
 # Generates a self-signed certificate
 # This is enough for a mail server and if you don't want to pay a lot of
