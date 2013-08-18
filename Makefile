@@ -1,16 +1,25 @@
+default: all
 # Where the config files are stored
-ETC?=/etc
-BUNDLE?=--path=vendor
-DOMAIN=$(shell grep "^domain" mail.yml | cut -d" " -f2 | tr -d "'")
+ETC ?= /etc
+# Security level
+SECURITY ?= high
+# Bundler flags
+BUNDLE ?= --path=vendor
 
-SECURITY?=high
+# The domain
+# TODO define variables from mail.yml
+DOMAIN = $(shell grep "^domain" mail.yml | cut -d" " -f2 | tr -d "'")
 
-TEMPLATES=$(shell find etc/ -name "*.mustache")
-FILES=$(patsubst %.mustache,%,$(TEMPLATES))
+# The template files
+TEMPLATES = $(shell find etc/ -name "*.mustache")
+# The files
+FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 
+# Install gems
 bundle:
 	bundle install $(BUNDLE)
 
+# Generate files
 $(FILES):
 	bundle exec mustache mail.yml $@.mustache >$@
 
@@ -58,11 +67,14 @@ ssl-request-cert: ssl-keys
 	         --load-privkey=etc/ssl/private/$(DOMAIN).key \
 	         --template=etc/certs.cfg
 
+# Do the files
 all: $(FILES)
 
+# Cleanup
 clean:
 	rm -rf $(FILES)
 
+# Install to system
 install: all
 	rsync -av --no-owner --no-group etc/ $(ETC)/
 	# TODO set correct permissions here
