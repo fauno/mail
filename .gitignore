@@ -7,6 +7,10 @@ vendor/*
 *.key
 *.crt
 *.dkim
+*.dh
+*.csr
+ssl/certs/*
+ssl/private/*
 dns/*.txt
 domains
 transport
