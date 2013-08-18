@@ -9,11 +9,19 @@ BUNDLE ?= --path=vendor
 # The domain
 # TODO define variables from mail.yml
 DOMAIN = $(shell grep "^domain" mail.yml | cut -d" " -f2 | tr -d "'")
+MAILDIR = $(shell grep "^mail:" mail.yml | cut -d" " -f2 | tr -d "'")
 
 # The template files
 TEMPLATES = $(shell find etc/ -name "*.mustache")
 # The files
 FILES = $(patsubst %.mustache,%,$(TEMPLATES))
+
+# Do the files
+all: $(FILES)
+
+# Cleanup
+clean:
+	rm -rf $(FILES)
 
 # Install gems
 bundle:
@@ -68,12 +76,16 @@ ssl-request-cert: ssl-keys
 	         --load-privkey=etc/ssl/private/$(DOMAIN).key \
 	         --template=etc/certs.cfg
 
-# Do the files
-all: $(FILES)
-
-# Cleanup
-clean:
-	rm -rf $(FILES)
+# Create mail user and storage dirs
+install-vmail:
+	getent passwd vmail || \
+	useradd --comment 'Virtual Mail' \
+	        --system \
+	        --shell /bin/false \
+	        --user-group \
+	        --create-home \
+	        --home-dir '$(MAILDIR)' \
+	        vmail
 
 # Install to system
 install: all
