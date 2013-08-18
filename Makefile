@@ -12,13 +12,23 @@ bundle:
 $(FILES):
 	bundle exec mustache mail.yml $@.mustache >$@
 
-ssl-private:
+ssl-dirs:
 	mkdir -p etc/ssl/private
+	mkdir -p etc/ssl/certs
 
-opendkim: ssl-private
+# Generates an OpenDKIM key and DNS record
+opendkim: ssl-dirs
 	opendkim-genkey -s mail -v && \
 	mv mail.private etc/ssl/private/$(DOMAIN).dkim && \
 	mv mail.txt dns/opendkim.txt
+
+# Generates the private key, requires GnuTLS installed
+ssl-key: ssl-dirs
+	certtool --generate-privkey --outfile=etc/ssl/private/$(DOMAIN).key
+
+
+certs: ssl-dirs
+	
 
 all: $(FILES)
 
