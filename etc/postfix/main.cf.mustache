@@ -33,6 +33,7 @@ queue_directory = /var/spool/postfix
 # The command_directory parameter specifies the location of all
 # postXXX commands.
 #
+# Note: Just a few distros have merged /usr/bin
 command_directory = /usr/sbin
 
 # The daemon_directory parameter specifies the location of all Postfix
@@ -743,7 +744,7 @@ smtpd_tls_loglevel = 0
 smtpd_tls_received_header = yes
 smtpd_tls_session_cache_timeout = 3600s
 
-# SASL authentication
+# SASL authentication using dovecot
 
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_security_options = noanonymous
