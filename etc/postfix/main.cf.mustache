@@ -30,7 +30,7 @@ readme_directory = no
 
 # Domain
 mydomain = {{domain}}
-myhostname = mail.$mydomain
+myhostname = $mydomain
 myorigin = $mydomain
 # Extra domains
 mydestination = /etc/postfix/domains
@@ -69,9 +69,9 @@ local_recipient_maps = proxy:unix:passwd.byname $virtual_mailbox_maps
 
 # Numbers correspond to the vmail/mail/whatever user/group that should
 # own the maildirs/mailboxes
-virtual_minimum_uid = mail
-virtual_uid_maps = static:mail
-virtual_gid_maps = static:mail
+virtual_minimum_uid = vmail
+virtual_uid_maps = static:vmail
+virtual_gid_maps = static:vmail
 
 # ## Quota Settings 
 
