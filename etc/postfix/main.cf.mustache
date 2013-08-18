@@ -716,18 +716,34 @@ smtpd_recipient_restrictions =
 #	check_policy_service unix:private/policy
 
 # Use TLS
-smtpd_use_tls = yes
 # Always!
+smtpd_use_tls = yes
+smtp_use_tls = yes
 smtpd_tls_auth_only = no
+
+# Crypto files
+tls_random_source = dev:/dev/urandom
 smtpd_tls_key_file = /etc/ssl/private/{{domain}}.key
 smtpd_tls_cert_file = /etc/ssl/certs/{{domain}}.crt
+smtpd_tls_dh1024_param_file = /etc/ssl/private/1024.dh
+smtpd_tls_dh512_param_file = /etc/ssl/private/512.dh
+smtpd_tls_CApath = /etc/ssl/certs
+
+# This means not all emails will be sent encrypted, when MTAs don't have
+# TLS enabled (shared hosting, etc.)
+smtpd_tls_security_level = may
+# We like strong cryptography
+smtpd_tls_eecdh_grade = strong
+smtpd_tls_mandatory_ciphers = high
+# Exclude insecure ciphers
+smtpd_tls_mandatory_exclude_ciphers = aNULL, MD5
+smtpd_tls_mandatory_protocols = TLSv1
+
 smtpd_tls_loglevel = 0
 smtpd_tls_received_header = yes
 smtpd_tls_session_cache_timeout = 3600s
-tls_random_source = dev:/dev/urandom
 
-
-# ## SASL
+# SASL authentication
 
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_security_options = noanonymous
