@@ -643,6 +643,32 @@ newaliases_path = /usr/bin/newaliases
 # 
 mailq_path = /usr/bin/mailq
 
+# setgid_group: The group for mail submission and queue management
+# commands.  This must be a group name with a numerical group ID that
+# is not shared with other accounts, not even with the Postfix account.
+#
+setgid_group = postdrop
+
+# html_directory: The location of the Postfix HTML documentation.
+#
+html_directory = no
+
+# manpage_directory: The location of the Postfix on-line manual pages.
+#
+manpage_directory = /usr/share/man
+
+# sample_directory: The location of the Postfix sample configuration files.
+# This parameter is obsolete as of Postfix 2.1.
+#
+sample_directory = /etc/postfix/sample
+
+# readme_directory: The location of the Postfix README files.
+#
+readme_directory = /usr/share/doc/postfix
+
+# Our extra config, so far we've been modifying postfix default main.cf
+
+# VIRTUAL
 virtual_transport = virtual
 
 # Return mailbox/maildir path
@@ -674,30 +700,7 @@ virtual_mailbox_limit = 0
 mailbox_size_limit= 0
 message_size_limit = 0
 
-# setgid_group: The group for mail submission and queue management
-# commands.  This must be a group name with a numerical group ID that
-# is not shared with other accounts, not even with the Postfix account.
-#
-setgid_group = postdrop
-
-# html_directory: The location of the Postfix HTML documentation.
-#
-html_directory = no
-
-# manpage_directory: The location of the Postfix on-line manual pages.
-#
-manpage_directory = /usr/share/man
-
-# sample_directory: The location of the Postfix sample configuration files.
-# This parameter is obsolete as of Postfix 2.1.
-#
-sample_directory = /etc/postfix/sample
-
-# readme_directory: The location of the Postfix README files.
-#
-readme_directory = /usr/share/doc/postfix
-
-# Our extra config, so far we've been modifying postfix default main.cf
+# ?
 disable_dns_lookups = no
 strict_8bitmime = no
 disable_mime_output_conversion = no
