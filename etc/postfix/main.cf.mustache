@@ -764,3 +764,7 @@ dovecot_destination_recipient_limit=1
 
 # WITHOUT THIS MAILMAN DOES NOT WORK!!!
 append_at_myorigin = no
+
+# Let OpenDKIM sign and check all emails
+smtpd_milters = inet:localhost:8891
+non_smtpd_milters = inet:localhost:8891
