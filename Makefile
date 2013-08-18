@@ -29,7 +29,8 @@ ssl-dirs:
 	mkdir -p etc/ssl/certs
 
 # Generates an OpenDKIM key and DNS record
-opendkim: ssl-dirs
+opendkim: ssl-dirs etc/opendkim/opendkim.conf
+	test -f etc/ssl/private/$(DOMAIN).dkim || \
 	opendkim-genkey -s mail -v && \
 	mv mail.private etc/ssl/private/$(DOMAIN).dkim && \
 	mv mail.txt dns/opendkim.txt
