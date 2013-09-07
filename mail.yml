@@ -13,4 +13,5 @@ postfix_password: ''
 admin_password: ''
 dovecot_password: ''
 sasl_password: ''
+slapd_password: ''
 ---
