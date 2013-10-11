@@ -12,7 +12,7 @@ DOMAIN = $(shell grep "^domain" mail.yml | cut -d" " -f2 | tr -d "'")
 MAILDIR = $(shell grep "^mail:" mail.yml | cut -d" " -f2 | tr -d "'")
 
 # The template files
-TEMPLATES = $(shell find etc/ -name "*.mustache")
+TEMPLATES = $(shell find etc/ ldif/ -name "*.mustache")
 # The files
 FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 
@@ -87,6 +87,20 @@ install-vmail:
 	        --create-home \
 	        --home-dir '$(MAILDIR)' \
 	        vmail
+
+# Copy the database config and load the base ldif
+install-openldap: ldif/slap.ldif etc/openldap/slapd.conf etc/openldap/schema/authldap.schema
+	rsync -av --no-owner --no-group etc/openldap/ $(ETC)/openldap/
+	-cp etc/openldap/DB_CONFIG \
+			/var/lib/openldap/openldap-data/
+	# Run the daemon
+	pgrep slapd || /usr/bin/slapd -u ldap -g ldap && \
+	               echo $$! >/tmp/slapd.pid
+	# Add the ldif
+	ldapadd -x -f ldif/slap.ldif
+	# Kill the daemon if we started it
+	test -f /tmp/slapd.pid && pkill -F /tmp/slapd.pid && \
+	                          rm /tmp/slapd.pid
 
 # Install to system
 install: all
