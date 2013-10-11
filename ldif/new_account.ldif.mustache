@@ -1,0 +1,15 @@
+# Account
+dn: mail={{user}}@{{domain}},ou={{inhabitants}},dc={{hostname}}.local
+givenName: {{name}}
+sn: {{last_name}}
+cn: {{name}} {{last_name}}
+mail: {{user}}@{{domain}}
+uid: {{user}}
+userPassword:: {{user_password}}
+uidNumber: 1001
+gidNumber: 100
+homeDirectory: {{mail}}/{{domain}}/{{user}}/
+objectClass: inetOrgPerson
+objectClass: CourierMailAccount
+objectClass: top
+

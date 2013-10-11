@@ -1,0 +1,8 @@
+# Admin account
+dn: uid={{admin}},ou={{admins}},dc={{hostname}}.local
+objectClass: account
+objectClass: simpleSecurityObject
+objectClass: top
+uid: {{admin}}
+structuralObjectClass: account
+userPassword:: {{admin_password}}

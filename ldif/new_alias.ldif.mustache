@@ -1,0 +1,10 @@
+# Email forward
+dn: cn={{user}},ou={{inhabitants}},dc={{hostname}}.local
+cn: {{user}}
+sn: {{user}}
+mail: {{user}}@{{domain}}
+maildrop: {{redirect_to}}
+objectClass: inetOrgPerson
+objectClass: CourierMailAlias
+objectClass: top
+structuralObjectClass: inetOrgPerson
