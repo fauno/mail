@@ -772,3 +772,7 @@ append_at_myorigin = no
 # Let OpenDKIM sign and check all emails
 smtpd_milters = inet:localhost:8891
 non_smtpd_milters = inet:localhost:8891
+
+# Postscreen will filter out spam
+postscreen_access_list = permit_mynetworks
+postscreen_greet_action = enforce
