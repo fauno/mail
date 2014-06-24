@@ -1,15 +1,21 @@
 default: all
+
+# Domains this node will be serving, one per line without comments
+DOMAIN_LIST = $(PWD)/domains
+# How you call the inhabitants of the node
+PEOPLE = pirates
+# Base group of the PEOPLE
+GROUP = ship
+
 # Where the config files are stored
 ETC ?= /etc
-# Security level
+# Security level for GnuTLS
 SECURITY ?= high
 # Bundler flags
 BUNDLE ?= --path=vendor
 
-# The domain
-# TODO define variables from mail.yml
-DOMAIN = $(shell grep "^domain" mail.yml | cut -d" " -f2 | tr -d "'")
-MAILDIR = $(shell grep "^mail:" mail.yml | cut -d" " -f2 | tr -d "'")
+# List of domains extracted from the domain file
+DOMAINS = $(shell cat $(DOMAIN_LIST) )
 
 # The template files
 TEMPLATES = $(shell find etc/ -name "*.mustache")
