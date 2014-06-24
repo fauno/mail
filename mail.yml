@@ -6,11 +6,4 @@ inhabitants: 'pirates'
 admins: 'subalmirants'
 groups: 'ships'
 services: 'daemons'
-
-# These will be the passwords for the services
-# Fill with slappasswd
-postfix_password: ''
-admin_password: ''
-dovecot_password: ''
-sasl_password: ''
 ---
