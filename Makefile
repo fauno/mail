@@ -28,10 +28,10 @@ TEMPLATES = $(shell find etc/ -name "*.mustache")
 FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 
 # Do the files
-all: make-yml $(FILES)
+all: PHONY make-yml $(FILES)
 
 # Create the mail.yml file for mustache to work
-make-yml:
+make-yml: PHONY
 	echo "----" >mail.yml
 	echo "hostname: $(HOST)" >>mail.yml
 	echo "fqdn: $(FQDN)" >>mail.yml
@@ -42,7 +42,7 @@ make-yml:
 	echo "----" >>mail.yml
 
 # Cleanup
-clean:
+clean: PHONY
 	rm -rf $(FILES) mail.yml
 
 # Install gems
@@ -53,6 +53,12 @@ bundle:
 $(FILES):
 	bundle exec mustache mail.yml $@.mustache >$@
 
+create-groups:
+	# a group for the inhabitants
+	groupadd $(GROUP)
+	# a group for private keys
+	groupadd --system keys
+
 # Create directories
 ssl-dirs:
 	# setgid set for private keys
@@ -61,23 +67,25 @@ ssl-dirs:
 
 # Generates an OpenDKIM key and DNS record
 opendkim: ssl-dirs etc/opendkim/opendkim.conf
-	test -f etc/ssl/private/$(DOMAIN).dkim || \
+	test -f etc/ssl/private/$(FQDN).dkim || \
 	opendkim-genkey -s mail -v && \
-	mv mail.private etc/ssl/private/$(DOMAIN).dkim && \
+	mv mail.private etc/ssl/private/$(FQDN).dkim && \
 	mv mail.txt dns/opendkim.txt
 
-# Generates the private key, requires GnuTLS installed
-ssl-keys: ssl-dirs
-	test -f etc/ssl/private/$(DOMAIN).key || \
-	certtool --generate-privkey \
-	         --outfile=etc/ssl/private/$(DOMAIN).key \
-	         --sec-param=$(SECURITY)
+dh-params:
 	for dh in 512 1024 2048; do \
 	  test -f etc/ssl/private/$$dh.dh || \
 	  certtool --generate-dh \
 	           --outfile=etc/ssl/private/$$dh.dh \
 	           --bits=$$dh ; \
 	done
+
+# Generates the private key, requires GnuTLS installed
+ssl-keys: dh-params ssl-dirs
+	test -f etc/ssl/private/$(DOMAIN).key || \
+	certtool --generate-privkey \
+	         --outfile=etc/ssl/private/$(DOMAIN).key \
+	         --sec-param=$(SECURITY)
 
 # Generates a self-signed certificate
 # This is enough for a mail server and if you don't want to pay a lot of
@@ -115,3 +123,6 @@ install-vmail:
 install:
 	rsync -av --no-owner --no-group --exclude="*.mustache" etc/ $(ETC)/
 	# TODO set correct permissions here
+
+PHONY:
+.PHONY: PHONY
