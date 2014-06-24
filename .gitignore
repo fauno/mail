@@ -15,3 +15,4 @@ ssl/private/*
 dns/*.txt
 domains
 transport
+*.yml
