@@ -89,6 +89,6 @@ install-vmail:
 	        vmail
 
 # Install to system
-install: all
-	rsync -av --no-owner --no-group etc/ $(ETC)/
+install:
+	rsync -av --no-owner --no-group --exclude="*.mustache" etc/ $(ETC)/
 	# TODO set correct permissions here
