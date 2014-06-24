@@ -55,8 +55,9 @@ $(FILES):
 
 # Create directories
 ssl-dirs:
-	mkdir -p etc/ssl/private
-	mkdir -p etc/ssl/certs
+	# setgid set for private keys
+	install -d -m 2750 etc/ssl/private
+	install -d -m 755 etc/ssl/certs
 
 # Generates an OpenDKIM key and DNS record
 opendkim: ssl-dirs etc/opendkim/opendkim.conf
