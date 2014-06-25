@@ -30,20 +30,23 @@ FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 # Do the files
 all: PHONY make-yml $(FILES)
 
+make-tmp:
+	mkdir -p tmp
+
 # Create the mail.yml file for mustache to work
 make-yml: PHONY
-	echo "----" >mail.yml
+	echo "---" >mail.yml
 	echo "hostname: $(HOST)" >>mail.yml
 	echo "fqdn: $(FQDN)" >>mail.yml
 	echo "domains:" >>mail.yml
 	sed  "s/^/    - /" $(DOMAIN_LIST) >>mail.yml
 	echo "people: $(PEOPLE)" >>mail.yml
 	echo "group: $(GROUP)" >>mail.yml
-	echo "----" >>mail.yml
+	echo "---" >>mail.yml
 
 # Cleanup
 clean: PHONY
-	rm -rf $(FILES) mail.yml
+	rm -rf $(FILES) mail.yml etc/ssl tmp
 
 # Install gems
 bundle:
@@ -80,33 +83,49 @@ dh-params:
 	           --bits=$$dh ; \
 	done
 
-# Generates the private key, requires GnuTLS installed
-ssl-keys: dh-params ssl-dirs
-	test -f etc/ssl/private/$(DOMAIN).key || \
+SSL_TEMPLATE = $(addprefix ssl-template-,$(DOMAINS))
+$(SSL_TEMPLATE): ssl-template-%: make-tmp make-yml
+	sed "s/fqdn: .*/fqdn: $*/" mail.yml | bundle exec mustache - etc/certs.cfg.mustache >tmp/$*.cfg
+
+# Generates the private key for a domain, requires GnuTLS installed
+SSL_KEYS = $(addprefix ssl-keys-,$(DOMAINS))
+$(SSL_KEYS): ssl-keys-%: ssl-dirs
+	test -f etc/ssl/private/$*.key || \
 	certtool --generate-privkey \
-	         --outfile=etc/ssl/private/$(DOMAIN).key \
+	         --outfile=etc/ssl/private/$*.key \
 	         --sec-param=$(SECURITY)
+
+# Generates all private keys
+ssl-keys: $(SSL_KEYS)
 
 # Generates a self-signed certificate
 # This is enough for a mail server and if you don't want to pay a lot of
 # USD for a few thousand bits.  It's not for user agents trying to
 # verify your certs unaware of this situation
-ssl-self-signed-cert: ssl-keys
-	test -f etc/ssl/certs/$(DOMAIN).crt || \
+SSL_SELF_SIGNED_CERT = $(addprefix ssl-self-signed-cert-,$(DOMAINS))
+$(SSL_SELF_SIGNED_CERT): ssl-self-signed-cert-%: ssl-keys-% ssl-template-%
+	test -f etc/ssl/certs/$*.crt || \
 	certtool --generate-self-signed \
-	         --outfile=etc/ssl/certs/$(DOMAIN).crt \
-	         --load-privkey=etc/ssl/private/$(DOMAIN).key \
-	         --template=etc/certs.cfg
+	         --outfile=etc/ssl/certs/$*.crt \
+	         --load-privkey=etc/ssl/private/$*.key \
+	         --template=tmp/$*.cfg
+
+# Generates all self signed certs
+ssl-self-signed-certs: $(SSL_SELF_SIGNED_CERT)
 
 # First step on the process of getting a certificate, generate a
 # request.  This file must be uploaded to the CA.  You can get one for
 # free at cacert.org or starssl.com (though they ask for personal info.)
-ssl-request-cert: ssl-keys
-	test -f etc/ssl/private/$(DOMAIN).csr || \
+SSL_REQUEST_CERT = $(addprefix ssl-request-cert-,$(DOMAINS))
+$(SSL_REQUEST_CERT): ssl-request-cert-%: ssl-keys-% ssl-template-%
+	test -f etc/ssl/private/$*.csr || \
 	certtool --generate-request \
-	         --outfile=etc/ssl/private/$(DOMAIN).csr \
-	         --load-privkey=etc/ssl/private/$(DOMAIN).key \
-	         --template=etc/certs.cfg
+	         --outfile=etc/ssl/private/$*.csr \
+	         --load-privkey=etc/ssl/private/$*.key \
+	         --template=tmp/$*.cfg
+
+# Generate all SSL requests
+ssl-request-certs: $(SSL_REQUEST_CERT)
 
 # Create mail user and storage dirs
 install-vmail:
