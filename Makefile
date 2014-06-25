@@ -83,49 +83,47 @@ dh-params:
 	           --bits=$$dh ; \
 	done
 
-SSL_TEMPLATE = $(addprefix ssl-template-,$(DOMAINS))
-$(SSL_TEMPLATE): ssl-template-%: make-tmp make-yml
-	sed "s/fqdn: .*/fqdn: $*/" mail.yml | bundle exec mustache - etc/certs.cfg.mustache >tmp/$*.cfg
+SSL_TEMPLATES = $(addsuffix .cfg,$(addprefix tmp/,$(DOMAINS)))
+$(SSL_TEMPLATES): tmp/%.cfg: make-tmp make-yml
+	sed "s,fqdn: .*,fqdn: $*," mail.yml | bundle exec mustache - etc/certs.cfg.mustache >$@
 
 # Generates the private key for a domain, requires GnuTLS installed
-SSL_KEYS = $(addprefix ssl-keys-,$(DOMAINS))
-$(SSL_KEYS): ssl-keys-%: ssl-dirs
-	test -f etc/ssl/private/$*.key || \
+SSL_PRIVATE_KEYS = $(addsuffix .key,$(addprefix etc/ssl/private/,$(DOMAINS)))
+$(SSL_PRIVATE_KEYS): ssl-dirs
 	certtool --generate-privkey \
-	         --outfile=etc/ssl/private/$*.key \
+	         --outfile=$@ \
 	         --sec-param=$(SECURITY)
 
 # Generates all private keys
-ssl-keys: $(SSL_KEYS)
+ssl-private-keys: $(SSL_PRIVATE_KEYS)
 
 # Generates a self-signed certificate
 # This is enough for a mail server and if you don't want to pay a lot of
 # USD for a few thousand bits.  It's not for user agents trying to
 # verify your certs unaware of this situation
-SSL_SELF_SIGNED_CERT = $(addprefix ssl-self-signed-cert-,$(DOMAINS))
-$(SSL_SELF_SIGNED_CERT): ssl-self-signed-cert-%: ssl-keys-% ssl-template-%
-	test -f etc/ssl/certs/$*.crt || \
+
+SSL_SELF_SIGNED_CERTS = $(addsuffix .crt,$(addprefix etc/ssl/certs/,$(DOMAINS)))
+$(SSL_SELF_SIGNED_CERTS): etc/ssl/certs/%.crt: etc/ssl/private/%.key tmp/%.cfg
 	certtool --generate-self-signed \
-	         --outfile=etc/ssl/certs/$*.crt \
-	         --load-privkey=etc/ssl/private/$*.key \
+	         --outfile=$@ \
+	         --load-privkey=$< \
 	         --template=tmp/$*.cfg
 
 # Generates all self signed certs
-ssl-self-signed-certs: $(SSL_SELF_SIGNED_CERT)
+ssl-self-signed-certs: $(SSL_SELF_SIGNED_CERTS)
 
 # First step on the process of getting a certificate, generate a
 # request.  This file must be uploaded to the CA.  You can get one for
 # free at cacert.org or starssl.com (though they ask for personal info.)
-SSL_REQUEST_CERT = $(addprefix ssl-request-cert-,$(DOMAINS))
-$(SSL_REQUEST_CERT): ssl-request-cert-%: ssl-keys-% ssl-template-%
-	test -f etc/ssl/private/$*.csr || \
+SSL_REQUEST_CERTS = $(addsuffix .csr,$(addprefix etc/ssl/private/,$(DOMAINS)))
+$(SSL_REQUEST_CERTS): etc/ssl/private/%.csr: etc/ssl/private/%.key tmp/%.cfg
 	certtool --generate-request \
-	         --outfile=etc/ssl/private/$*.csr \
-	         --load-privkey=etc/ssl/private/$*.key \
+	         --outfile=$@ \
+	         --load-privkey=$< \
 	         --template=tmp/$*.cfg
 
 # Generate all SSL requests
-ssl-request-certs: $(SSL_REQUEST_CERT)
+ssl-request-certs: $(SSL_REQUEST_CERTS)
 
 # Create mail user and storage dirs
 install-vmail:
