@@ -28,13 +28,13 @@ TEMPLATES = $(shell find etc/ -name "*.mustache")
 FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 
 # Do the files
-all: PHONY make-yml $(FILES)
+all: PHONY mail.yml $(FILES) ssl-self-signed-certs
 
 make-tmp:
 	mkdir -p tmp
 
 # Create the mail.yml file for mustache to work
-make-yml: PHONY
+mail.yml:
 	echo "---" >mail.yml
 	echo "hostname: $(HOST)" >>mail.yml
 	echo "fqdn: $(FQDN)" >>mail.yml
@@ -63,7 +63,7 @@ create-groups:
 	groupadd --system keys
 
 # Create directories
-ssl-dirs:
+ssl-dirs: PHONY
 	# setgid set for private keys
 	install -d -m 2750 etc/ssl/private
 	install -d -m 755 etc/ssl/certs
@@ -84,12 +84,12 @@ dh-params:
 	done
 
 SSL_TEMPLATES = $(addsuffix .cfg,$(addprefix tmp/,$(DOMAINS)))
-$(SSL_TEMPLATES): tmp/%.cfg: make-tmp make-yml
+$(SSL_TEMPLATES): tmp/%.cfg: mail.yml | make-tmp
 	sed "s,fqdn: .*,fqdn: $*," mail.yml | bundle exec mustache - etc/certs.cfg.mustache >$@
 
 # Generates the private key for a domain, requires GnuTLS installed
 SSL_PRIVATE_KEYS = $(addsuffix .key,$(addprefix etc/ssl/private/,$(DOMAINS)))
-$(SSL_PRIVATE_KEYS): ssl-dirs
+$(SSL_PRIVATE_KEYS): | ssl-dirs
 	certtool --generate-privkey \
 	         --outfile=$@ \
 	         --sec-param=$(SECURITY)
