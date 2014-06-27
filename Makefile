@@ -31,7 +31,7 @@ TEMPLATES = $(shell find etc/ -name "*.mustache")
 FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 
 # Do the files
-all: PHONY mail.yml $(FILES) ssl-self-signed-certs
+all: PHONY $(FILES) opendkim ssl-self-signed-certs
 
 make-tmp:
 	mkdir -p tmp
@@ -72,11 +72,14 @@ ssl-dirs: PHONY
 	install -d -m 755 etc/ssl/certs
 
 # Generates an OpenDKIM key and DNS record
-opendkim: ssl-dirs etc/opendkim/opendkim.conf
-	test -f etc/ssl/private/$(FQDN).dkim || \
-	opendkim-genkey -s mail -v && \
-	mv mail.private etc/ssl/private/$(FQDN).dkim && \
-	mv mail.txt dns/opendkim.txt
+# Note: this generates a single key shared across all domains if you
+# have more than one
+etc/ssl/private/$(FQDN).dkim: etc/opendkim/opendkim.conf | ssl-dirs
+	opendkim-genkey -s mail -v
+	mv mail.private etc/ssl/private/$(FQDN).dkim
+	mv mail.txt dns/$(FQDN).txt
+
+opendkim: etc/ssl/private/$(FQDN).dkim
 
 # Generate DH params, needed by Perfect Forward Secrecy cyphersuites
 # Some notes:

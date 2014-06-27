@@ -73,7 +73,7 @@ mail_owner = postfix
 # from gethostname(). $myhostname is used as a default value for many
 # other configuration parameters.
 #
-myhostname = {{domain}}
+myhostname = {{fqdn}}
 
 # The mydomain parameter specifies the local internet domain name.
 # The default is to use $myhostname minus the first component.
@@ -770,8 +770,8 @@ dovecot_destination_recipient_limit=1
 append_at_myorigin = no
 
 # Let OpenDKIM sign and check all emails
-smtpd_milters = inet:localhost:8891
-non_smtpd_milters = inet:localhost:8891
+smtpd_milters = unix:/var/lib/postfix/opendkim.sock
+non_smtpd_milters = unix:/var/lib/postfix/opendkim.sock
 
 # Postscreen will filter out spam
 postscreen_access_list = permit_mynetworks

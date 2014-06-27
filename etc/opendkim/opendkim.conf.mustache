@@ -1,15 +1,39 @@
 Syslog yes
+LogResults yes
 #LogWhy yes
 SyslogSuccess yes
-# postfix
+
+# We use postfix so opendkim can read domains.cf
 UserId postfix
-Domain file:/etc/postfix/domains
+# The list of postfix destination domains
+Domain file:/etc/postfix/domains.cf
 
 Canonicalization simple
 
-KeyFile /etc/ssl/private/{{domain}}.dkim
+KeyFile /etc/ssl/private/{{fqdn}}.dkim
 Selector mail
 
 SignatureAlgorithm      rsa-sha256
 
-Socket inet:8891@localhost
+# Listen on a port
+# Socket inet:8891@localhost
+# Or a unix socket which is more secure
+Socket local:/var/lib/postfix/opendkim.sock
+UMask 077
+
+# Sign subdomains of those listed by the Domain parameter as well as the
+# actual domains.
+SubDomains true
+
+# Messages bearing signatures that failed to verify are redirected to
+# the specified address.  The original enve‐ lope recipient set is
+# recorded in the header before redirection occurs.  By default, no
+# redirection is done.
+RedirectFailuresTo root@{{fqdn}}
+
+# If true, when a signature verification fails and the signing site
+# advertises a reporting address (i.e. r=user in its policy record)
+# and a request for reports of such failures, the filter will send
+# a structured report to that address containing details needed to
+# reproduce the problem.
+SendReports true
