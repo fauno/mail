@@ -19,6 +19,9 @@ SECURITY ?= high
 # Bundler flags
 BUNDLE ?= --path=vendor
 
+# Diffie-Hellman bits
+DH_BITS = 512 1024 2048
+
 # List of domains extracted from the domain file
 DOMAINS = $(shell cat $(DOMAIN_LIST) )
 
@@ -75,13 +78,18 @@ opendkim: ssl-dirs etc/opendkim/opendkim.conf
 	mv mail.private etc/ssl/private/$(FQDN).dkim && \
 	mv mail.txt dns/opendkim.txt
 
-dh-params:
-	for dh in 512 1024 2048; do \
-	  test -f etc/ssl/private/$$dh.dh || \
-	  certtool --generate-dh \
-	           --outfile=etc/ssl/private/$$dh.dh \
-	           --bits=$$dh ; \
-	done
+# Generate DH params, needed by Perfect Forward Secrecy cyphersuites
+# Some notes:
+# * Read this for DH in postfix: http://postfix.1071664.n5.nabble.com/Diffie-Hellman-parameters-td63096.html
+# * With certtool 3.3.4 creation of dh params for 4096 bits fail
+DIFFIE_HELLMAN_PARAMS = $(addsuffix .dh,$(addprefix etc/ssl/private/,$(DH_BITS)))
+$(DIFFIE_HELLMAN_PARAMS): etc/ssl/private/%.dh: | ssl-dirs
+	certtool --generate-dh-params \
+	         --outfile=etc/ssl/private/$*.dh \
+	         --bits=$*
+
+# Generate all dh params
+ssl-dh-params: $(DIFFIE_HELLMAN_PARAMS)
 
 SSL_TEMPLATES = $(addsuffix .cfg,$(addprefix tmp/,$(DOMAINS)))
 $(SSL_TEMPLATES): tmp/%.cfg: mail.yml | make-tmp
