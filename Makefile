@@ -52,11 +52,11 @@ clean: PHONY
 	rm -rf $(FILES) mail.yml etc/ssl tmp
 
 # Install gems
-bundle:
+bundle: PHONY
 	bundle install $(BUNDLE)
 
 # Generate files
-$(FILES):
+$(FILES): | bundle
 	bundle exec mustache mail.yml $@.mustache >$@
 
 create-groups:
@@ -92,7 +92,7 @@ $(DIFFIE_HELLMAN_PARAMS): etc/ssl/private/%.dh: | ssl-dirs
 ssl-dh-params: $(DIFFIE_HELLMAN_PARAMS)
 
 SSL_TEMPLATES = $(addsuffix .cfg,$(addprefix tmp/,$(DOMAINS)))
-$(SSL_TEMPLATES): tmp/%.cfg: mail.yml | make-tmp
+$(SSL_TEMPLATES): tmp/%.cfg: mail.yml | bundle make-tmp
 	sed "s,fqdn: .*,fqdn: $*," mail.yml | bundle exec mustache - etc/certs.cfg.mustache >$@
 
 # Generates the private key for a domain, requires GnuTLS installed
