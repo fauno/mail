@@ -95,6 +95,11 @@ SSL_TEMPLATES = $(addsuffix .cfg,$(addprefix tmp/,$(DOMAINS)))
 $(SSL_TEMPLATES): tmp/%.cfg: mail.yml | bundle make-tmp
 	sed "s,fqdn: .*,fqdn: $*," mail.yml | bundle exec mustache - etc/certs.cfg.mustache >$@
 
+# Wildcard domains allow to share a single certificate across subdomains
+X_SSL_TEMPLATES = $(addsuffix .cfg,$(addprefix tmp/x.,$(DOMAINS)))
+$(X_SSL_TEMPLATES): tmp/x.%.cfg: mail.yml | bundle make-tmp
+	sed "s,fqdn: .*,fqdn: '*.$*'," mail.yml | bundle exec mustache - etc/certs.cfg.mustache >$@
+
 # Generates the private key for a domain, requires GnuTLS installed
 SSL_PRIVATE_KEYS = $(addsuffix .key,$(addprefix etc/ssl/private/,$(DOMAINS)))
 $(SSL_PRIVATE_KEYS): | ssl-dirs
@@ -109,7 +114,6 @@ ssl-private-keys: $(SSL_PRIVATE_KEYS)
 # This is enough for a mail server and if you don't want to pay a lot of
 # USD for a few thousand bits.  It's not for user agents trying to
 # verify your certs unaware of this situation
-
 SSL_SELF_SIGNED_CERTS = $(addsuffix .crt,$(addprefix etc/ssl/certs/,$(DOMAINS)))
 $(SSL_SELF_SIGNED_CERTS): etc/ssl/certs/%.crt: etc/ssl/private/%.key tmp/%.cfg
 	certtool --generate-self-signed \
@@ -117,8 +121,16 @@ $(SSL_SELF_SIGNED_CERTS): etc/ssl/certs/%.crt: etc/ssl/private/%.key tmp/%.cfg
 	         --load-privkey=$< \
 	         --template=tmp/$*.cfg
 
-# Generates all self signed certs
-ssl-self-signed-certs: $(SSL_SELF_SIGNED_CERTS)
+# Wildcard domains are generated using the same key
+X_SSL_SELF_SIGNED_CERTS = $(addsuffix .crt,$(addprefix etc/ssl/certs/x.,$(DOMAINS)))
+$(X_SSL_SELF_SIGNED_CERTS): etc/ssl/certs/x.%.crt: etc/ssl/private/%.key tmp/x.%.cfg
+	certtool --generate-self-signed \
+	         --outfile=$@ \
+	         --load-privkey=$< \
+	         --template=tmp/x.$*.cfg
+
+# Generates all self signed certs including wildcard
+ssl-self-signed-certs: $(SSL_SELF_SIGNED_CERTS) $(X_SSL_SELF_SIGNED_CERTS)
 
 # First step on the process of getting a certificate, generate a
 # request.  This file must be uploaded to the CA.  You can get one for
@@ -130,8 +142,15 @@ $(SSL_REQUEST_CERTS): etc/ssl/private/%.csr: etc/ssl/private/%.key tmp/%.cfg
 	         --load-privkey=$< \
 	         --template=tmp/$*.cfg
 
+X_SSL_REQUEST_CERTS = $(addsuffix .csr,$(addprefix etc/ssl/private/x.,$(DOMAINS)))
+$(X_SSL_REQUEST_CERTS): etc/ssl/private/x.%.csr: etc/ssl/private/%.key tmp/x.%.cfg
+	certtool --generate-request \
+	         --outfile=$@ \
+	         --load-privkey=$< \
+	         --template=tmp/x.$*.cfg
+
 # Generate all SSL requests
-ssl-request-certs: $(SSL_REQUEST_CERTS)
+ssl-request-certs: $(SSL_REQUEST_CERTS) $(X_SSL_REQUEST_CERTS)
 
 # Create mail user and storage dirs
 install-vmail:
