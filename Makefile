@@ -59,7 +59,7 @@ bundle: PHONY
 $(FILES): | bundle
 	bundle exec mustache mail.yml $@.mustache >$@
 
-create-groups:
+create-groups: PHONY
 	# a group for the inhabitants
 	groupadd $(GROUP)
 	# a group for private keys
