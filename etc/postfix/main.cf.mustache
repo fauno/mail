@@ -727,8 +727,8 @@ smtp_tls_note_starttls_offer = yes
 
 # Crypto files
 smtpd_tls_CApath = /etc/ssl/certs
-smtpd_tls_key_file = /etc/ssl/private/{{domain}}.key
-smtpd_tls_cert_file = /etc/ssl/certs/{{domain}}.crt
+smtpd_tls_key_file = /etc/ssl/private/{{fqdn}}.key
+smtpd_tls_cert_file = /etc/ssl/certs/{{fqdn}}.crt
 tls_random_source = dev:/dev/urandom
 
 # Diffie-Hellman params
