@@ -722,16 +722,23 @@ smtpd_recipient_restrictions =
 # Use TLS
 # Always!
 smtpd_use_tls = yes
+smtpd_tls_auth_only = yes
 smtp_use_tls = yes
-smtpd_tls_auth_only = no
+smtp_tls_note_starttls_offer = yes
 
 # Crypto files
-tls_random_source = dev:/dev/urandom
+smtpd_tls_CApath = /etc/ssl/certs
 smtpd_tls_key_file = /etc/ssl/private/{{domain}}.key
 smtpd_tls_cert_file = /etc/ssl/certs/{{domain}}.crt
-smtpd_tls_dh1024_param_file = /etc/ssl/private/1024.dh
+tls_random_source = dev:/dev/urandom
+
+# Diffie-Hellman params
+# Read this for DH in postfix: http://postfix.1071664.n5.nabble.com/Diffie-Hellman-parameters-td63096.html
+smtpd_tls_dh1024_param_file = /etc/ssl/private/2048.dh
 smtpd_tls_dh512_param_file = /etc/ssl/private/512.dh
-smtpd_tls_CApath = /etc/ssl/certs
+
+# Prefer our ciphers rather than clients'
+tls_preempt_cipherlist = yes
 
 # This means not all emails will be sent encrypted, when MTAs don't have
 # TLS enabled (shared hosting, etc.)
@@ -739,28 +746,24 @@ smtpd_tls_security_level = may
 # We like strong cryptography
 smtpd_tls_eecdh_grade = strong
 smtpd_tls_mandatory_ciphers = high
+smtpd_tls_ciphers = medium
 # Exclude insecure ciphers
-smtpd_tls_mandatory_exclude_ciphers = aNULL, MD5
+smtpd_tls_exclude_ciphers = aNULL, MD5, DES, 3DES, DES-CBC3-SHA, RC4-SHA, AES256-SHA, AES128-SHA
 smtpd_tls_mandatory_protocols = TLSv1
+
+smtp_tls_ciphers = $smtpd_tls_ciphers
+smtp_tls_mandatory_ciphers = $smtpd_tls_mandatory_ciphers
+smtp_tls_protocols = !SSLv2, SSLv3, TLSv1
 
 smtpd_tls_loglevel = 0
 smtpd_tls_received_header = yes
 smtpd_tls_session_cache_timeout = 3600s
 
 # SASL authentication using dovecot
-
-smtpd_sasl_auth_enable = yes
-smtpd_sasl_security_options = noanonymous
-broken_sasl_auth_clients = yes
 smtpd_sasl_type = dovecot
 smtpd_sasl_path = private/auth
 smtpd_sasl_auth_enable = yes
 broken_sasl_auth_clients = yes
-
-
-# ## Dovecot
-dovecot_destination_recipient_limit=1
-
 
 # ## Mailman
 
