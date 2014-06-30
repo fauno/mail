@@ -23,7 +23,7 @@ BUNDLE ?= --path=vendor
 DH_BITS = 512 1024 2048
 
 # List of domains extracted from the domain file
-DOMAINS = $(shell cat $(DOMAIN_LIST) )
+DOMAINS = $(shell cat $(DOMAIN_LIST))
 
 # The template files
 TEMPLATES = $(shell find etc/ -name "*.mustache")
@@ -33,7 +33,7 @@ FILES = $(patsubst %.mustache,%,$(TEMPLATES))
 # Do the files
 all: PHONY $(FILES) opendkim ssl-self-signed-certs
 
-make-tmp:
+make-tmp: PHONY
 	mkdir -p tmp
 
 # Create the mail.yml file for mustache to work
