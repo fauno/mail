@@ -160,7 +160,7 @@ inet_interfaces = all
 #mydestination = $myhostname, localhost.$mydomain, localhost
 #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
 #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
-#	mail.$mydomain, www.$mydomain, ftp.$mydomain
+#  mail.$mydomain, www.$mydomain, ftp.$mydomain
 
 mydestination = /etc/postfix/domains.cf
 
@@ -602,17 +602,17 @@ debug_peer_level = 2
 # set up your XAUTHORITY environment variable before starting Postfix.
 #
 debugger_command =
-	 PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
-	 ddd $daemon_directory/$process_name $process_id & sleep 5
+   PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+   ddd $daemon_directory/$process_name $process_id & sleep 5
 
 # If you can't use X, use this to capture the call stack when a
 # daemon crashes. The result is in a file in the configuration
 # directory, and is named after the process name and the process ID.
 #
 # debugger_command =
-#	PATH=/bin:/usr/bin:/usr/local/bin; export PATH; (echo cont;
-#	echo where) | gdb $daemon_directory/$process_name $process_id 2>&1
-#	>$config_directory/$process_name.$process_id.log & sleep 5
+#  PATH=/bin:/usr/bin:/usr/local/bin; export PATH; (echo cont;
+#  echo where) | gdb $daemon_directory/$process_name $process_id 2>&1
+#  >$config_directory/$process_name.$process_id.log & sleep 5
 #
 # Another possibility is to run gdb under a detached screen session.
 # To attach to the screen sesssion, su root and run "screen -r
@@ -620,9 +620,9 @@ debugger_command =
 # sessions (from "screen -list").
 #
 # debugger_command =
-#	PATH=/bin:/usr/bin:/sbin:/usr/sbin; export PATH; screen
-#	-dmS $process_name gdb $daemon_directory/$process_name
-#	$process_id & sleep 1
+#  PATH=/bin:/usr/bin:/sbin:/usr/sbin; export PATH; screen
+#  -dmS $process_name gdb $daemon_directory/$process_name
+#  $process_id & sleep 1
 
 # INSTALL-TIME CONFIGURATION INFORMATION
 #
@@ -708,16 +708,17 @@ disable_mime_output_conversion = no
 # Client restrictions
 smtpd_client_restrictions =
   permit_mynetworks,
-  permit_sasl_authenticated,
+  permit_sasl_authenticated
 
 # Rejection policy
 smtpd_recipient_restrictions =
-	permit_mynetworks,
-	permit_sasl_authenticated,
-	reject_unauth_destination,
-	reject_non_fqdn_sender,
-	reject_unlisted_recipient,
-#	check_policy_service unix:private/policy
+  permit_mynetworks,
+  permit_sasl_authenticated,
+  reject_authenticated_sender_login_mismatch,
+  reject_unauth_destination,
+  reject_non_fqdn_sender,
+  reject_unlisted_recipient,
+  reject_rbl_client zen.spamhaus.org
 
 # Use TLS
 # Always!
@@ -765,12 +766,9 @@ smtpd_sasl_path = private/auth
 smtpd_sasl_auth_enable = yes
 broken_sasl_auth_clients = yes
 
-# ## Mailman
-
-#mailman_destination_recipient_limit = 1
-
-# WITHOUT THIS MAILMAN DOES NOT WORK!!!
-append_at_myorigin = no
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_local_domain = $myhostname
+smtp_sasl_security_options = noanonymous
 
 # Let OpenDKIM sign and check all emails
 smtpd_milters = unix:/var/lib/postfix/opendkim.sock
@@ -779,3 +777,10 @@ non_smtpd_milters = unix:/var/lib/postfix/opendkim.sock
 # Postscreen will filter out spam
 postscreen_access_list = permit_mynetworks
 postscreen_greet_action = enforce
+
+# Other anti spammer options
+smtpd_helo_required = yes
+disable_vrfy_command = yes
+
+# RBLs
+maps_rbl_domains = zen.spamhaus.org
