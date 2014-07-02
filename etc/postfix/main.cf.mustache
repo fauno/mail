@@ -5,7 +5,7 @@
 # For common configuration examples, see BASIC_CONFIGURATION_README
 # and STANDARD_CONFIGURATION_README. To find these documents, use
 # the command "postconf html_directory readme_directory", or go to
-# http://www.postfix.org/.
+# http://www.postfix.org/BASIC_CONFIGURATION_README.html etc.
 #
 # For best results, change no more than 2-3 parameters at a time,
 # and test if Postfix still works after every change.
@@ -160,7 +160,7 @@ inet_interfaces = all
 #mydestination = $myhostname, localhost.$mydomain, localhost
 #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
 #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
-#  mail.$mydomain, www.$mydomain, ftp.$mydomain
+#	mail.$mydomain, www.$mydomain, ftp.$mydomain
 
 mydestination = /etc/postfix/domains.cf
 
@@ -203,10 +203,10 @@ mydestination = /etc/postfix/domains.cf
 # In the left-hand side, specify a bare username, an @domain.tld
 # wild-card, or specify a user@domain.tld address.
 # 
-#local_recipient_maps = unix:passwd.byname $alias_maps
+local_recipient_maps = unix:passwd.byname $alias_maps
 #local_recipient_maps = proxy:unix:passwd.byname $alias_maps
 #local_recipient_maps =
-local_recipient_maps = proxy:unix:passwd.byname $virtual_mailbox_maps
+#local_recipient_maps = proxy:unix:passwd.byname $virtual_mailbox_maps
 
 # The unknown_local_recipient_reject_code specifies the SMTP server
 # response code when a recipient domain matches $mydestination or
@@ -247,6 +247,7 @@ unknown_local_recipient_reject_code = 550
 # 
 #mynetworks_style = class
 #mynetworks_style = subnet
+# TODO enable subnet if this is going to be a librevpn node
 mynetworks_style = host
 
 # Alternatively, you can specify the mynetworks list by hand, in
@@ -314,6 +315,7 @@ relay_domains = $mydestination
 #relayhost = [mailserver.isp.tld]
 #relayhost = uucphost
 #relayhost = [an.ip.add.ress]
+# TODO enable for lvpn
 
 # REJECTING UNKNOWN RELAY USERS
 #
@@ -387,9 +389,9 @@ transport_maps = hash:/etc/postfix/transport
 #alias_maps = hash:/etc/aliases
 #alias_maps = hash:/etc/aliases, nis:mail.aliases
 #alias_maps = netinfo:/aliases
-#alias_maps = hash:/etc/postfix/aliases
+alias_maps = hash:/etc/postfix/aliases
 # Mailman aliases
-alias_maps = hash:/var/lib/mailman/data/aliases
+#alias_maps = hash:/var/lib/mailman/data/aliases
 
 # The alias_database parameter specifies the alias database(s) that
 # are built with "newaliases" or "sendmail -bi".  This is a separate
@@ -421,7 +423,7 @@ recipient_delimiter = +
 # "Maildir/" for qmail-style delivery (the / is required).
 #
 #home_mailbox = Mailbox
-#home_mailbox = Maildir/
+home_mailbox = Maildir/
 
 # The mail_spool_directory parameter specifies the directory where
 # UNIX-style mailboxes are kept. The default setting depends on the
@@ -531,7 +533,7 @@ recipient_delimiter = +
 #
 # For details, see "man header_checks".
 #
-#header_checks = regexp:/etc/postfix/header_checks
+header_checks = regexp:/etc/postfix/header_checks
 
 # FAST ETRN SERVICE
 #
@@ -665,43 +667,6 @@ sample_directory = /etc/postfix/sample
 readme_directory = /usr/share/doc/postfix
 
 # Our extra config, so far we've been modifying postfix default main.cf
-
-# VIRTUAL
-virtual_transport = virtual
-
-# Return mailbox/maildir path
-virtual_mailbox_maps = ldap:/etc/postfix/ldap/virtual_maps.cf
-virtual_mailbox_base = /
-
-# Return maildrops
-virtual_alias_maps = regexp:/etc/postfix/listas.cf,
-                     hash:/var/lib/mailman/data/virtual-mailman,
-                     ldap:/etc/postfix/ldap/virtual_alias.cf
-
-
-
-# ## Filesystem settings
-
-# Enables Postfix to create maildirs/mailboxes
-# virtual_create_maildirsize = yes
-
-# Numbers correspond to the vmail/mail/whatever user/group that should
-# own the maildirs/mailboxes
-virtual_minimum_uid = vmail
-virtual_uid_maps = static:vmail
-virtual_gid_maps = static:vmail
-
-# ## Quota Settings 
-
-# Limits are in bytes
-virtual_mailbox_limit = 0
-mailbox_size_limit= 0
-message_size_limit = 0
-
-# ?
-disable_dns_lookups = no
-strict_8bitmime = no
-disable_mime_output_conversion = no
 
 # Client restrictions
 smtpd_client_restrictions =
